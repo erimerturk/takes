@@ -21,49 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.takes.rq;
-
-import java.io.IOException;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.Test;
+package org.takes.misc;
 
 /**
- * Test case for {@link RqWithHeader}.
- * @author Yegor Bugayenko (yegor@teamed.io)
+ * Action for {@link Transform} to perform actual transformation.
+ *
+ * @author Jason Wong (super132j@yahoo.com)
  * @version $Id$
- * @since 0.9
+ * @since 0.15.2
  */
-public final class RqWithHeaderTest {
+public interface TransformAction<T, K> {
+    /**
+     * The transform action of the element of type T to K.
+     * @param element Element of the iterable
+     * @return Transformed element
+     */
+    K transform(T element);
 
     /**
-     * RqWithHeader can add a header.
-     * @throws IOException If some problem inside
+     * Trimming action used with {@link Transform}.
      */
-    @Test
-    public void addsHttpHeaders() throws IOException {
-        MatcherAssert.assertThat(
-            new RqPrint(
-                new RqWithHeader(
-                    new RqFake(),
-                    "Host", "www.example.com"
-                )
-            ).print(),
-            Matchers.containsString("Host: www.example.com")
-        );
+    class Trim implements TransformAction<String, String> {
+
+        @Override
+        public String transform(final String element) {
+            return element.trim();
+        }
     }
 
     /**
-     * Checks RqWithHeader equals method.
-     * @throws Exception If some problem inside
+     * Convert CharSequence into String.
      */
-    @Test
-    public void equalsAndHashCodeEqualTest() throws Exception {
-        EqualsVerifier.forClass(RqWithHeader.class)
-            .suppress(Warning.TRANSIENT_FIELDS)
-            .withRedefinedSuperclass()
-            .verify();
+    class ToString implements TransformAction<CharSequence, String> {
+
+        @Override
+        public String transform(final CharSequence element) {
+            return element.toString();
+        }
+
     }
 }

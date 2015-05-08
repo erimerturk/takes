@@ -21,49 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.takes.rq;
+package org.takes.misc;
 
-import java.io.IOException;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
+import com.google.common.base.Joiner;
+import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 /**
- * Test case for {@link RqWithHeader}.
- * @author Yegor Bugayenko (yegor@teamed.io)
+ * Test case for {@link Transform}.
+ *
+ * @author Jason Wong (super132j@yahoo.com)
  * @version $Id$
- * @since 0.9
+ * @since 0.15.2
  */
-public final class RqWithHeaderTest {
+public final class TransformTest {
 
     /**
-     * RqWithHeader can add a header.
-     * @throws IOException If some problem inside
+     * Transform can transform list.
      */
     @Test
-    public void addsHttpHeaders() throws IOException {
+    public void transformsList() {
         MatcherAssert.assertThat(
-            new RqPrint(
-                new RqWithHeader(
-                    new RqFake(),
-                    "Host", "www.example.com"
+            Joiner.on(" ").join(
+                new Transform<String, String>(
+                    Arrays.asList("one", "two", "three"),
+                    new TransformAction<String, String>() {
+                        @Override
+                        public String transform(final String element) {
+                            return element.concat("t");
+                        }
+                    }
                 )
-            ).print(),
-            Matchers.containsString("Host: www.example.com")
+            ),
+            Matchers.equalTo("onet twot threet")
         );
     }
 
-    /**
-     * Checks RqWithHeader equals method.
-     * @throws Exception If some problem inside
-     */
-    @Test
-    public void equalsAndHashCodeEqualTest() throws Exception {
-        EqualsVerifier.forClass(RqWithHeader.class)
-            .suppress(Warning.TRANSIENT_FIELDS)
-            .withRedefinedSuperclass()
-            .verify();
-    }
 }

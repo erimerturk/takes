@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import org.apache.commons.lang.StringUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.takes.Request;
 import org.takes.Response;
@@ -106,20 +107,18 @@ public final class RqMultipartTest {
     }
 
     /**
-     * RqMultipart.Base can throw exception on no name
+     * RqMultipart.Fake can throw exception on no name
      * at Content-Disposition header.
      * @throws IOException if some problem inside
      */
     @Test(expected = IOException.class)
     public void throwsExceptionOnNoNameAtContentDispositionHeader()
         throws IOException {
-        new RqMultipart.Base(
-            RqMultipartTest.request(
-                Joiner.on(RqMultipartTest.CRLF).join(
-                    "Content-Disposition: form-data; fake=\"address\"",
-                    "",
-                    "340 N Wolfe Rd, Sunnyvale, CA 94085"
-                )
+        new RqMultipart.Fake(
+            Joiner.on(RqMultipartTest.CRLF).join(
+                "Content-Disposition: form-data; fake=\"address\"",
+                "",
+                "340 N Wolfe Rd, Sunnyvale, CA 94085"
             )
         );
     }
@@ -170,7 +169,7 @@ public final class RqMultipartTest {
      */
     @Test
     public void parsesHttpBody() throws IOException {
-        final Request req = RqMultipartTest.request(
+        final RqMultipart multi = new RqMultipart.Fake(
             Joiner.on(RqMultipartTest.CRLF).join(
                 "Content-Disposition: form-data; name=\"address\"",
                 "",
@@ -178,7 +177,6 @@ public final class RqMultipartTest {
             ),
             "Content-Disposition: form-data; name=\"data\"; filename=\"a.bin\""
         );
-        final RqMultipart multi = new RqMultipart.Base(req);
         MatcherAssert.assertThat(
             new RqHeaders.Base(
                 multi.part("address").iterator().next()
@@ -210,12 +208,12 @@ public final class RqMultipartTest {
     }
 
     /**
-     * RqMultipart.Base can return empty iterator on invalid part request.
+     * RqMultipart.Fake can return empty iterator on invalid part request.
      * @throws IOException If some problem inside
      */
     @Test
     public void returnsEmptyIteratorOnInvalidPartRequest() throws IOException {
-        final Request req = RqMultipartTest.request(
+        final RqMultipart multi = new RqMultipart.Fake(
             Joiner.on(RqMultipartTest.CRLF).join(
                 "Content-Disposition: form-data; name=\"address\"",
                 "",
@@ -223,7 +221,6 @@ public final class RqMultipartTest {
             ),
             "Content-Disposition: form-data; name=\"data\"; filename=\"a.zip\""
         );
-        final RqMultipart multi = new RqMultipart.Base(req);
         MatcherAssert.assertThat(
             multi.part("fake").iterator().hasNext(),
             Matchers.is(false)
@@ -231,12 +228,12 @@ public final class RqMultipartTest {
     }
 
     /**
-     * RqMultipart.Base can return correct name set.
+     * RqMultipart.Fake can return correct name set.
      * @throws IOException If some problem inside
      */
     @Test
     public void returnsCorrectNamesSet() throws IOException {
-        final Request req = RqMultipartTest.request(
+        final RqMultipart multi = new RqMultipart.Fake(
             Joiner.on(RqMultipartTest.CRLF).join(
                 "Content-Disposition: form-data; name=\"address\"",
                 "",
@@ -244,7 +241,6 @@ public final class RqMultipartTest {
             ),
             "Content-Disposition: form-data; name=\"data\"; filename=\"a.bin\""
         );
-        final RqMultipart multi = new RqMultipart.Base(req);
         MatcherAssert.assertThat(
             multi.names(),
             Matchers.<Iterable<String>>equalTo(
@@ -287,6 +283,8 @@ public final class RqMultipartTest {
      * @throws IOException if some problem inside
      */
     @Test
+    // see https://github.com/yegor256/takes/issues/253
+    @Ignore
     public void consumesHttpRequest() throws IOException {
         final Take take = new Take() {
             @Override

@@ -21,49 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.takes.rq;
+package org.takes.misc;
 
-import java.io.IOException;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
+import java.util.Arrays;
+import java.util.List;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 /**
- * Test case for {@link RqWithHeader}.
- * @author Yegor Bugayenko (yegor@teamed.io)
+ * Tests for {@link VerboseIterable}.
+ * @author Marcus Sanchez (sanchez.marcus@gmail.com)
  * @version $Id$
- * @since 0.9
+ * @since 0.15.1
  */
-public final class RqWithHeaderTest {
+public class VerboseIterableTest {
 
     /**
-     * RqWithHeader can add a header.
-     * @throws IOException If some problem inside
+     * VerboseIterable can return correct size collection.
      */
     @Test
-    public void addsHttpHeaders() throws IOException {
-        MatcherAssert.assertThat(
-            new RqPrint(
-                new RqWithHeader(
-                    new RqFake(),
-                    "Host", "www.example.com"
-                )
-            ).print(),
-            Matchers.containsString("Host: www.example.com")
+    public final void returnsCorrectSize() {
+        final List<String> valid = Arrays.asList(
+            "Accept: text/plain",
+            "Accept-Charset: utf-8",
+            "Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
+            "Cache-Control: no-cache",
+            "From: user@example.com"
         );
-    }
-
-    /**
-     * Checks RqWithHeader equals method.
-     * @throws Exception If some problem inside
-     */
-    @Test
-    public void equalsAndHashCodeEqualTest() throws Exception {
-        EqualsVerifier.forClass(RqWithHeader.class)
-            .suppress(Warning.TRANSIENT_FIELDS)
-            .withRedefinedSuperclass()
-            .verify();
+        MatcherAssert.assertThat(
+            new VerboseIterable<String>(
+                valid,
+                "Empty Error Message"
+            ),
+            Matchers.<String>iterableWithSize(valid.size())
+        );
     }
 }
